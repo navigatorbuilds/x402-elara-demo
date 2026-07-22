@@ -1,0 +1,28 @@
+# x402 × Elara work-layer receipt demo — LOCAL-ONLY workspace.
+#
+# Two crates, deliberately split by LICENSE and by capability, mirroring the
+# real protocol's node/verifier split:
+#
+#   crates/elara-mint         AGPL-3.0-only. Links the AGPL Elara node crate.
+#                             The ONE-TIME mint + signer: it is the only thing
+#                             here that can generate a keypair or sign an act,
+#                             because signing is a node-side capability BY DESIGN
+#                             (the verifier crates are signing-incapable — that
+#                             is what makes them trustworthy).
+#
+#   crates/x402-work-receipt  MIT OR Apache-2.0. Depends ONLY on the permissive
+#                             elara-record + elara-verify crates. Everything a
+#                             downstream x402 consumer would actually reuse —
+#                             assembling the offline envelope and verifying it —
+#                             lives here and carries no AGPL obligation.
+#
+# The x402 payment apps (apps/*) wrap the thesis in a real payment flow. They link
+# only permissive crates; signing is delegated to the AGPL elara-mint via subprocess.
+[workspace]
+resolver = "2"
+members = [
+    "crates/elara-mint",
+    "crates/x402-work-receipt",
+    "apps/paywalled-resource",
+    "apps/paying-agent",
+]

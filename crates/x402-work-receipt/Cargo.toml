@@ -1,0 +1,26 @@
+[package]
+name = "x402-work-receipt"
+version = "0.1.0"
+edition = "2021"
+publish = false
+# MIT OR Apache-2.0 — the SAME permissive license as elara-record / elara-verify.
+# This is the reusable half of the demo: a downstream x402 consumer can lift the
+# envelope-assembly + offline-verify pattern with no AGPL obligation. It depends
+# ONLY on the two permissive verify crates — never on the AGPL node.
+license = "MIT OR Apache-2.0"
+description = "Assemble + offline-verify an Elara agent-mandate receipt for an x402 payment act (permissive; verify-only)."
+
+[dependencies]
+# The permissive Elara data + verify crates, path-linked from the sibling
+# elara-runtime checkout. NO AGPL dependency, NO signing capability.
+elara-record = { path = "../../../elara-runtime/crates/elara-record" }
+elara-verify = { path = "../../../elara-runtime/crates/elara-verify" }
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+hex = "0.4"
+clap = { version = "4", features = ["derive"] }
+
+[[bin]]
+name = "x402-work-receipt"
+path = "src/main.rs"

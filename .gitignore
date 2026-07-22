@@ -1,0 +1,14 @@
+/target
+Cargo.lock
+
+# All minted material is EPHEMERAL — regenerate any time with scripts/mint.sh or
+# scripts/thesis-demo.sh. Secret identities never leave this machine; the signed
+# mandate carrier is a matched-set artifact of one provision run, so the whole
+# dir regenerates rather than committing half of it.
+/fixtures/
+
+# Per-run offline envelopes + captured verifier output.
+/envelopes/
+
+# Committed, self-contained reference artifacts live in examples/ (NOT ignored) —
+# a reader can verify those with zero secrets.

@@ -1,0 +1,18 @@
+✗ NOT AUTHORIZED
+  flag                : post_revocation
+  authorized          : false
+  attributes to principal: true
+  network             : testnet
+  signer (agent)      : a3c7f1eab997868541bcc306efd60eea5e843c00482ac4ace02a69e50eddf7a7
+  principal           : f04de39fa448100fce45798c0aa88e5ba2b7bf75a924934de5bde6aeaeb058fa
+  act timestamp (ms)  : 1784062714592
+  explanation         : the principal had REVOKED this mandate before the act was signed
+  scope note          : v0 enforces agent identity + validity window + revocation (the WHO and the WHEN). A mandate's op/zone/amount scope is recorded but not checked offline in v0 — sound, node-invariant scope enforcement is a later slice.
+  checks:
+      [pass] act signature — Dilithium3 valid over the act's canonical bytes
+      [pass] mandate[0] — verified + principal-bound; indexed under content id 612553684eaf…
+      [pass] revocation[0] — verified; indexed by (mandate_id, revoker)
+  soundness caveats (what an offline envelope CANNOT prove):
+      • A ✓ CONSISTENT verdict proves the carrier signatures are valid and the authority held at the act's signed time — GIVEN ONLY the records in this bundle.
+      • It does NOT prove these records exist on the Elara ledger, are sealed, or are time-anchored. For that, query a node's /mandate/status or run `elara-verify --seal --anchor`.
+      • The bundle's author chooses what it contains: this verifier CANNOT detect a revocation that was withheld, nor confirm either identity has ever submitted records to any node. Cross-check the principal against a node before relying on the attribution.

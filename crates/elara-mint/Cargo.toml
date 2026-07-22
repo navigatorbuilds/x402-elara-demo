@@ -1,0 +1,25 @@
+[package]
+name = "elara-mint"
+version = "0.1.0"
+edition = "2021"
+publish = false
+# AGPL-3.0-only: this crate links `elara-runtime` (the AGPL Elara node) for the
+# ONLY two things the permissive verifier cannot do — generate a keypair and sign
+# a record. It is the demo's single AGPL touch. Nothing in x402-work-receipt (the
+# reusable half) depends on it.
+license = "AGPL-3.0-only"
+description = "One-time AGPL mint + act signer for the x402 × Elara work-receipt demo."
+
+[dependencies]
+# The AGPL node crate, path-linked from the sibling checkout. Default features
+# only (default = []): pure-Rust identity + mandate + record, no node/rocksdb/tokio.
+# The re-export chain makes these the SAME types the permissive verifier reads:
+#   elara_runtime::record  == elara_record::record   (elara-runtime/src/lib.rs)
+#   elara_runtime::mandate == elara_verify::mandate
+elara-runtime = { path = "../../../elara-runtime" }
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+hex = "0.4"
+clap = { version = "4", features = ["derive"] }
+anyhow = "1"

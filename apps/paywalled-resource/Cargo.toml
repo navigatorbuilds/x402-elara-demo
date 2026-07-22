@@ -1,0 +1,23 @@
+[package]
+name = "paywalled-resource"
+version = "0.1.0"
+edition = "2021"
+publish = false
+# MIT OR Apache-2.0 — a plain x402-axum demo server, no Elara/AGPL dependency.
+license = "MIT OR Apache-2.0"
+description = "An x402-paywalled resource (Base Sepolia USDC) for the Elara work-receipt demo."
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+http = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde_json = "1"
+
+# x402 payment enforcement (community x402-rs stack — see README for the choice).
+x402-axum = "2.0.2"
+# `server` feature exposes V1Eip155Exact::price_tag (price-tag construction).
+x402-chain-eip155 = { version = "2.0.2", features = ["server"] }
+x402-types = "2.0.2"
+alloy-primitives = "1"
