@@ -1,0 +1,29 @@
+{
+  "alg": "ES256",
+  "backLink": {
+    "attestationDigest": "sha256:ec5d0b17be661b7801129c6794073f2a714f06df6c54f82a7753c3e07c05a8f5",
+    "attestationNonce": "x402-elara-0"
+  },
+  "decisionDerived": {
+    "decidedAt": "2026-07-14T21:26:19Z",
+    "decision": "allow",
+    "evidenceRef": {
+      "canonicalization": "JCS",
+      "digest": "sha256:615f29beb70841953779b38210a88404db5e2c2bee352fe21eed5337510525d7",
+      "ref": "x402:action_ref/sha256:94a1f4748e9278cd2521018f022606bd3163695acd14042ea7268181a69cdfff",
+      "schema": "x402.settlement/v0"
+    },
+    "policyId": "policy:elara-mandate-bundle/1",
+    "reason": "offline mandate bundle verifies: agent was authorized by the principal at act time (x402-work-receipt: \u2713 CONSISTENT)"
+  },
+  "issuerAsserted": {
+    "alg": "ES256",
+    "iat": "2026-07-14T21:26:19Z",
+    "iss": "issuer://elara-work-layer",
+    "nonce": "d-elara-0",
+    "secretVersion": "v1",
+    "sub": "agent:elara/3f947015c8e55291af12879ebdcb8604627d162d37277a9acb5af3d0b38ca8ef"
+  },
+  "signature": "1c9232511d82bd83486ddeb419c6ad4ce002e0ede6293f94db6a80798586f4fd0e3935370f4228f0242ddc55b2a5534b08c42480ead3e1d739a9d7eccfee20a9",
+  "version": 1
+}

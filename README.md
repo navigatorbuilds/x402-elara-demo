@@ -133,6 +133,71 @@ internals. That is the composition point.
 
 ---
 
+## Conformance (x402 settlement-receipt binding, `elara` rail)
+
+The composition point above is no longer hypothetical: the x402
+settlement-receipt binding extension
+([x402-foundation/x402#2666](https://github.com/x402-foundation/x402/pull/2666))
+specifies a content-addressed join between a settlement and a receipt, with
+committed conformance vectors and an independent checker (stdlib + JCS + ES256,
+imports neither x402 nor any receipt framework) in
+[vaaraio/vaara](https://github.com/vaaraio/vaara)
+`tests/vectors/x402_settlement_v0/`.
+
+[`conformance/x402-settlement-v0/`](conformance/x402-settlement-v0/) commits an
+**`elara` rail in that suite's exact fixture format**, binding the upstream join
+to this demo's authority leg — by content address in both directions, exactly as
+the extension's three-legs framing advises:
+
+- the action tuple's `scope` is the committed payment act's content address
+  (`elara:act/sha3-256:23892d77…` — the same 32-byte record hash the seam
+  section describes), and `timestampMs` is the act's own signed timestamp;
+- the receipt's `backLink.attestationDigest` is `sha256` over the committed
+  offline envelope (`envelopes/envelope.payment.json`) — the classical receipt
+  chains back to the post-quantum (ML-DSA) mandate attestation;
+- `actionRef` and `evidenceRef` recompute per the upstream math, unchanged.
+
+Two commands, runnable by a stranger from the repo root:
+
+```bash
+# 1. The UPSTREAM checker (vendored byte-identical, sha256-pinned; the runner
+#    refuses to start if the copy drifted) consumes the elara rail unmodified:
+pip install rfc8785 cryptography
+python3 conformance/x402-settlement-v0/run_elara.py     # exit 0, all verdicts OK
+
+# 2. The Rust verifier re-derives the digest that scope commits to, and
+#    verifies the PQ envelope the backLink chains to — fully offline:
+cargo run -p x402-work-receipt -- action-ref --act envelopes/act.payment.json
+cargo run -p x402-work-receipt -- verify --envelope envelopes/envelope.payment.json
+```
+
+Both directions were verified before committing: the upstream suite reproduces
+at its pinned tree (`python tests/vectors/x402_settlement_v0/_check_independent.py`
+→ exit 0, all 14 verdicts), and the `elara` rail passes the same checker file.
+
+**Upstream pin — by content, not by ref.** #2666 pins `vaaraio/vaara` tag
+`v1.1.1` at commit `088a869`. As of 2026-07-24 that SHA is orphaned: the tag
+resolves to `719827c` (same message, same committer timestamp — a metadata-only
+rewrite, re-tagged). The **trees are identical** (`c25f5fca…`), so the vectors
+#2666 verified are byte-for-byte the vectors the tag serves today — the content
+survived; the ref did not. That is this repo's whole thesis in one accident, so
+our pin names the content: tree `c25f5fcac8d965d0a90021ce97fca54468961fe7`,
+checker blob `06697860273c7e585b75550856ca31193b8a1e3d`, file sha256 in
+[`CHECKER.sha256`](conformance/x402-settlement-v0/CHECKER.sha256).
+
+Two deliberate differences from the upstream corpus, both documented in the
+fixtures' generator (`_generate.py`):
+
+- **The ES256 test private key is published** (`keys/es256_private.TEST-ONLY.pem`).
+  Upstream commits only the public key, so only the vector owner can mint new
+  passing receipts; this rail is re-mintable by anyone. The key signs nothing
+  but these fixtures.
+- **No risk-score fields.** The mandate verdict is deterministic — signatures
+  and the authority chain either verify or they do not — so `decisionDerived`
+  asserts no `riskScore`/thresholds. The checker digests the blocks as given.
+
+---
+
 ## Architecture (a deliberate license + capability split)
 
 The demo mirrors the real protocol's node/verifier split:

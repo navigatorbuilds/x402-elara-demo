@@ -1,0 +1,11 @@
+{
+  "actionRef": "sha256:39a36bb5b9a545bb0af0cc2c8f3dd8ecf8a2db636df2c58256a7527d253fb36e",
+  "actionType": "x402.payment",
+  "agentId": "agent:elara/3f947015c8e55291af12879ebdcb8604627d162d37277a9acb5af3d0b38ca8ef",
+  "paymentHash": "0x7a10a8b4c372f3b76d70c2106227da74c73874718b1a760e039f42d0c7871a74",
+  "schema": "x402.settlement/v0",
+  "scope": "elara:act/sha3-256:23892d778441755b930e1f75982e84f25e1f95655ed49237fbccab504866823c",
+  "seq": 1,
+  "terminal": true,
+  "timestampMs": 1784064379522
+}

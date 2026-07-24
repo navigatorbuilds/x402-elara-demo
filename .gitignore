@@ -12,3 +12,4 @@ Cargo.lock
 
 # Committed, self-contained reference artifacts live in examples/ (NOT ignored) —
 # a reader can verify those with zero secrets.
+__pycache__/
