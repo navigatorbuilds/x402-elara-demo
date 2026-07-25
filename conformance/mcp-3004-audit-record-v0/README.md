@@ -1,4 +1,4 @@
-# `authority-evidence` — a registered evidence profile for SEP-3004
+# `authority-evidence` — a worked evidence profile for SEP-3004
 
 A runnable mapping for the **Tamper-Evident Audit Record Contract**
 ([modelcontextprotocol#3004](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/3004)),
@@ -15,7 +15,7 @@ Both halves run in under a second, on stock tooling, from committed bytes.
 
 ```
 node --experimental-strip-types vendor/run_reference.ts   # 8 reference checks
-python3 run_mcp3004.py                                    # 7 evidence checks
+python3 run_mcp3004.py                                    # 8 evidence checks
 ```
 
 ---
@@ -30,13 +30,19 @@ authority-evidence`); after it, they validate, hash and chain. That is the
 contract's "new emitter types add an extension, not a new chain" claim,
 exercised rather than restated.
 
-**Two implementations agree.** `canon.py` is an independent reimplementation of
-the `gif-audit/2` canonical form, written from the specification text rather
-than ported from the TypeScript. Check R3 asserts the two agree on every
-fixture, and R0 asserts the vendored verifier still reproduces both published
-known-answer digests (`d494769c…`, `f733fed9…`) — so if the vendored copy were
-ever not the one the SEP describes, every other result here is void by
-construction.
+**Two implementations agree, and both land on the SEP's published digests.**
+`canon.py` is an independent reimplementation of the `gif-audit/2` canonical
+form, written from the specification text rather than ported from the
+TypeScript. Two anchors pin it, one from each side:
+
+- **E0** — the Python canonicalizer recomputes the SEP's own two published
+  known-answer digests (`d494769c…`, `f733fed9…`) from their published preimage
+  inputs. Neither implementation is derived from the other, and they agree.
+- **R0** — the vendored TypeScript still reproduces those same two digests, so
+  if the vendored copy were ever not the one the SEP describes, every other
+  result here is void by construction.
+
+**R3** then asserts the two agree on every fixture in this directory.
 
 **Three extensions, one digest.** `fixtures/three-extension-kat.json` carries
 `caller-governance` + `runtime-security` + `authority-evidence` side by side.
@@ -77,7 +83,7 @@ offline verifier reports.
 
 ---
 
-## Proposed registration (§2.2 shape)
+## The registration this exercises (§2.2 shape)
 
 **Type ID:** `authority-evidence`
 
@@ -105,6 +111,20 @@ makes no claim about the core `outcome`; a `not_authorized` verdict on an
 runtime drift evidence, `admission-control` (per #2809) to the admission
 decision, and this to the caller's authority to have acted at all. Same
 mechanism, one digest, three independent guarantees.
+
+**Who owns this slot.** The evidence-profile shape here is not ours. In #3004 on
+2026-07-15, matssun (MCP-RE) sketched a future registration committing to
+"independently verifiable runtime evidence — for example, an evidence profile
+identifier, digest, and optional reference," binding the record to "the actual
+MCP request, response, signer, and authority context"; the SEP's author replied
+that §2.2 is the registration surface for it. `evidence_profile` /
+`evidence_digest` / `evidence_uri` is that sketch, unchanged, because it was
+already the right decomposition. **This directory is an instance, not a claim.**
+It exists to answer one question early — does the mechanism actually hold weight
+when a third profile with real cryptographic artifacts is bolted on — and the
+answer is in the checks. If MCP-RE's registration lands and subsumes the
+authority axis under a different type id or field set, this remaps to it; the
+recomputability requirement above is the part worth keeping either way.
 
 ---
 

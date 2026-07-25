@@ -54,6 +54,50 @@ segment = json.loads((FIX / "segment.json").read_text())
 triple = json.loads((FIX / "three-extension-kat.json").read_text())
 
 # ---------------------------------------------------------------------------
+# E0 — THE ANCHOR. canon.py is an independent reimplementation of the `gif-audit/2`
+# canonical form, written from the SEP's specification text rather than ported from
+# the reference TypeScript. Here it recomputes the SEP's own two published
+# known-answer digests from their published preimage inputs. If these do not come
+# out, this directory's canonicalizer is not the one the SEP describes and every
+# other check here is void. (R0 in vendor/run_reference.ts makes the mirror-image
+# assertion for the vendored TypeScript; the two together are what "independent
+# reproduction" means — same digests, two languages, neither derived from the other.)
+# ---------------------------------------------------------------------------
+KAT_CORE = {
+    "event_id": "99999999-9999-9999-9999-999999999999",
+    "occurred_at": "2026-06-06T12:00:00.000Z",
+    "principal_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "event_type": "tool_call",
+    "tool_name": "export",
+    "outcome": "deferred",
+    "previous_hash": None,
+}
+KAT_CG_BODY = {
+    "flagged": False,
+    "invoked_by_principal_id": None,
+    "purpose_declared": "reconcile June invoices",
+    "session_id": "55555555-5555-5555-5555-555555555555",
+}
+KAT_RS_BODY = {
+    "drift_status": "confirmed",
+    "evidence_hash": "sha256:b2c547e2c8f17eafc72ef5c2d4d7b6b4d0f7437ab52bae573a9af14ff5e2d9be",
+    "policy_id": "example.org/runtime-drift@3",
+    "quarantine_decision": "quarantine",
+    "severity": "high",
+}
+KAT_1X = "d494769c1ae442ea88dd190068747abf63c0568a3b856f85791b1a50a99d48b4"
+KAT_2X = "f733fed9cc757165f810b778e4baba1f51a45504988e937707aaab4361b2f064"
+
+got_1x = compute_event_hash({**KAT_CORE, "extensions": {"caller-governance": KAT_CG_BODY}})
+got_2x = compute_event_hash({**KAT_CORE, "extensions": {"caller-governance": KAT_CG_BODY,
+                                                        "runtime-security": KAT_RS_BODY}})
+kat_ok = got_1x == KAT_1X and got_2x == KAT_2X
+check("E0-published-kat-anchor", kat_ok,
+      "independent Python canonicalizer reproduces both published SEP digests "
+      f"({KAT_1X[:8]}…, {KAT_2X[:8]}…)" if kat_ok
+      else f"KAT MISMATCH: 1x={got_1x} 2x={got_2x}")
+
+# ---------------------------------------------------------------------------
 # E1 — the digests the extension carries resolve to the committed artifacts.
 # A third party recomputes them with any SHA3-256; nothing is taken on trust.
 # ---------------------------------------------------------------------------

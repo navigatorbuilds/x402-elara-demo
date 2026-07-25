@@ -246,7 +246,7 @@ Neither property implies the other, which is the argument for the profile.
 ```bash
 node --experimental-strip-types \
   conformance/mcp-3004-audit-record-v0/vendor/run_reference.ts   # 8 reference checks
-python3 conformance/mcp-3004-audit-record-v0/run_mcp3004.py      # 7 evidence checks
+python3 conformance/mcp-3004-audit-record-v0/run_mcp3004.py      # 8 evidence checks
 ```
 
 `canon.py` is an independent second-language reproduction of the SEP's canonical
