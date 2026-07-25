@@ -1,0 +1,9 @@
+{
+  "_evidence_file": "conformance/erc8004-validation-v0/fixtures/verdict.postrevoke.json",
+  "_note": "response is deterministic-endpoint only: 100 iff the offline verifier returns CONSISTENT, 0 iff NOT AUTHORIZED",
+  "requestHash": "0x2ce30822b22f8ff69d5e73085aa2bf38a0140b97b21bf01a77dea7a51a3d5eec",
+  "response": 0,
+  "responseHash": "0xda3846d4e136dff53859c378af8bc362da2a66f9c540c50cf4b539f44a83dbd9",
+  "responseURI": "elara:verdict/sha3-256:da3846d4e136dff53859c378af8bc362da2a66f9c540c50cf4b539f44a83dbd9",
+  "tag": "elara-mandate-bundle-v0"
+}

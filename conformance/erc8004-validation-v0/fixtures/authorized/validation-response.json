@@ -1,0 +1,9 @@
+{
+  "_evidence_file": "conformance/erc8004-validation-v0/fixtures/verdict.payment.json",
+  "_note": "response is deterministic-endpoint only: 100 iff the offline verifier returns CONSISTENT, 0 iff NOT AUTHORIZED",
+  "requestHash": "0x9583bb071dceef40e98f64aecca65ba8d9a57e2c6663a6a6c4900b51894d49e6",
+  "response": 100,
+  "responseHash": "0x5950eb5aa14c58d733e3f14411336b22c5be0198198e18ad79a60d864ff6e80f",
+  "responseURI": "elara:verdict/sha3-256:5950eb5aa14c58d733e3f14411336b22c5be0198198e18ad79a60d864ff6e80f",
+  "tag": "elara-mandate-bundle-v0"
+}

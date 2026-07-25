@@ -1,0 +1,38 @@
+{
+  "verdict": "CONSISTENT",
+  "glyph": "✓",
+  "flag": "valid",
+  "authorized": true,
+  "attributes_to_principal": true,
+  "network": "testnet",
+  "signer": "db92026887e9e57a45becefa5aafa499e84d7dc9324c259cd0f6fe3d01c466e9",
+  "principal": "1195894b6ee8fffd9401ca01253549a034e8e8bd69cefb5f7caf583325a20820",
+  "act_timestamp_ms": 1784064379522,
+  "explanation": "this agent WAS authorized by the principal at the act's signed time — given the records in this bundle",
+  "lineage": [
+    {
+      "mandate_id": "d9d0f92a4f3406950dd14d74939d1bfd9e8655e68153adf95569fe4f8db0c0ce",
+      "principal": "1195894b6ee8fffd9401ca01253549a034e8e8bd69cefb5f7caf583325a20820",
+      "agent": "db92026887e9e57a45becefa5aafa499e84d7dc9324c259cd0f6fe3d01c466e9"
+    }
+  ],
+  "scope_note": "v0 enforces agent identity + validity window + revocation (the WHO and the WHEN). A mandate's op/zone/amount scope is recorded but not checked offline in v0 — sound, node-invariant scope enforcement is a later slice.",
+  "soundness_caveats": [
+    "A ✓ CONSISTENT verdict proves the carrier signatures are valid and the authority held at the act's signed time — GIVEN ONLY the records in this bundle.",
+    "It does NOT prove these records exist on the Elara ledger, are sealed, or are time-anchored. For that, query a node's /mandate/status or run `elara-verify --seal --anchor`.",
+    "The bundle's author chooses what it contains: this verifier CANNOT detect a revocation that was withheld, nor confirm either identity has ever submitted records to any node. Cross-check the principal against a node before relying on the attribution."
+  ],
+  "checks": [
+    {
+      "name": "act signature",
+      "status": "pass",
+      "detail": "Dilithium3 valid over the act's canonical bytes"
+    },
+    {
+      "name": "mandate[0]",
+      "status": "pass",
+      "detail": "verified + principal-bound; indexed under content id d9d0f92a4f34…"
+    }
+  ],
+  "reason": "ok"
+}

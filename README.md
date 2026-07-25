@@ -185,6 +185,31 @@ our pin names the content: tree `c25f5fcac8d965d0a90021ce97fca54468961fe7`,
 checker blob `06697860273c7e585b75550856ca31193b8a1e3d`, file sha256 in
 [`CHECKER.sha256`](conformance/x402-settlement-v0/CHECKER.sha256).
 
+### ERC-8004 validation bridge (`conformance/erc8004-validation-v0/`)
+
+The same authority leg, bridged to [ERC-8004](https://github.com/erc-8004/erc-8004-contracts)'s
+Validation Registry — the "off-chain delegation chains anchoring to on-chain agent
+identity" question its design discussion raises. The registry's `requestHash` /
+`responseHash` are opaque `bytes32` content hashes with URI pointers; our fixtures
+fill that shape so that **the validation response is not a score to trust but a
+proof to recompute**:
+
+- `requestHash` = NIST SHA3-256 over the committed offline envelope (the evidence);
+- `responseHash` = NIST SHA3-256 over the committed verifier verdict JSON;
+- `response` uses only the deterministic endpoints — **100** iff the offline
+  verifier returns ✓ CONSISTENT, **0** iff ✗ NOT AUTHORIZED (the post-revocation
+  counter-case is a committed fixture pair, not a footnote);
+- no chain interaction on our side: the fixtures show the join, and anyone
+  re-derives every hash and the verdict itself from this repo alone.
+
+```bash
+# 1. Recompute every fixture claim from committed files (stdlib only):
+python3 conformance/erc8004-validation-v0/run_bridge.py   # exit 0, 14 checks
+
+# 2. Re-derive the verdict the response content-addresses — fully offline:
+cargo run -p x402-work-receipt -- verify --envelope envelopes/envelope.payment.json
+```
+
 Two deliberate differences from the upstream corpus, both documented in the
 fixtures' generator (`_generate.py`):
 

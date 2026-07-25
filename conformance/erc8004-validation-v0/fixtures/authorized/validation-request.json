@@ -1,0 +1,8 @@
+{
+  "_evidence_file": "envelopes/envelope.payment.json",
+  "_note": "validatorAddress/agentId illustrative; requestHash = NIST SHA3-256 over the committed envelope file bytes",
+  "agentId": 1,
+  "requestHash": "0x9583bb071dceef40e98f64aecca65ba8d9a57e2c6663a6a6c4900b51894d49e6",
+  "requestURI": "elara:envelope/sha3-256:9583bb071dceef40e98f64aecca65ba8d9a57e2c6663a6a6c4900b51894d49e6",
+  "validatorAddress": "0x0000000000000000000000000000000000000000"
+}

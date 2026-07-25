@@ -1,0 +1,8 @@
+{
+  "_evidence_file": "envelopes/envelope.postrevoke.json",
+  "_note": "validatorAddress/agentId illustrative; requestHash = NIST SHA3-256 over the committed envelope file bytes",
+  "agentId": 1,
+  "requestHash": "0x2ce30822b22f8ff69d5e73085aa2bf38a0140b97b21bf01a77dea7a51a3d5eec",
+  "requestURI": "elara:envelope/sha3-256:2ce30822b22f8ff69d5e73085aa2bf38a0140b97b21bf01a77dea7a51a3d5eec",
+  "validatorAddress": "0x0000000000000000000000000000000000000000"
+}
