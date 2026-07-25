@@ -1,0 +1,32 @@
+{
+  "actorChain": {
+    "actors": [
+      {
+        "iss": "elara:testnet",
+        "requested_action": "pay:x402",
+        "scopes": [
+          "repo:read",
+          "pay:x402"
+        ],
+        "sub": "agent:coordinator"
+      },
+      {
+        "iss": "elara:testnet",
+        "requested_action": "pay:x402",
+        "scopes": [
+          "pay:x402"
+        ],
+        "sub": "agent:x402-settler"
+      }
+    ],
+    "origin": {
+      "iss": "elara:testnet",
+      "scopes": [
+        "repo:read",
+        "ci:trigger",
+        "pay:x402"
+      ],
+      "sub": "user:principal-18b6d2fc"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "verdict": "NOT AUTHORIZED",
+  "glyph": "✗",
+  "flag": "post_revocation",
+  "authorized": false,
+  "attributes_to_principal": true,
+  "network": "testnet",
+  "signer": "3f947015c8e55291af12879ebdcb8604627d162d37277a9acb5af3d0b38ca8ef",
+  "principal": "18b6d2fc894c67a761ed7ecb563d1eecaab477bec9a4c5ca6f2cd0cc9cb4c372",
+  "act_timestamp_ms": 1784707688906,
+  "explanation": "the principal had REVOKED this mandate before the act was signed",
+  "lineage": [],
+  "scope_note": "v0 enforces agent identity + validity window + revocation (the WHO and the WHEN). A mandate's op/zone/amount scope is recorded but not checked offline in v0 — sound, node-invariant scope enforcement is a later slice.",
+  "soundness_caveats": [
+    "A ✓ CONSISTENT verdict proves the carrier signatures are valid and the authority held at the act's signed time — GIVEN ONLY the records in this bundle.",
+    "It does NOT prove these records exist on the Elara ledger, are sealed, or are time-anchored. For that, query a node's /mandate/status or run `elara-verify --seal --anchor`.",
+    "The bundle's author chooses what it contains: this verifier CANNOT detect a revocation that was withheld, nor confirm either identity has ever submitted records to any node. Cross-check the principal against a node before relying on the attribution."
+  ],
+  "checks": [
+    {
+      "name": "act signature",
+      "status": "pass",
+      "detail": "Dilithium3 valid over the act's canonical bytes"
+    },
+    {
+      "name": "mandate[0]",
+      "status": "pass",
+      "detail": "verified + principal-bound; indexed under content id 408edfb75dcc…"
+    },
+    {
+      "name": "revocation[0]",
+      "status": "pass",
+      "detail": "verified; indexed by (mandate_id, revoker)"
+    }
+  ],
+  "reason": "ok"
+}

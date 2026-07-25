@@ -259,6 +259,29 @@ Proposal only — the SEP's authors own the registry; see the
 [directory README](conformance/mcp-3004-audit-record-v0/README.md) for the
 registration shape and the honest claims.
 
+### A2A actor-chain `proof_ref` (`conformance/a2a-2028-actor-chain-v0/`)
+
+Vectors for the actor-chain extension in
+[a2aproject/A2A#2028](https://github.com/a2aproject/A2A/issues/2028), around the
+distinction that thread converged on: **monotonic scope narrowing is a check on
+the reported chain, not proof that any hop was granted what it claims.**
+
+```bash
+python3 conformance/a2a-2028-actor-chain-v0/run_a2a2028.py   # 9 checks
+```
+
+W1–W3 implement the thread's own well-formedness rule (narrowing + append-only)
+including two negative vectors. A1–A6 resolve each hop's `proof_ref` against
+committed evidence. The headline pair is identical in every field a
+well-formedness checker can see and resolves to opposite authority verdicts; a
+third vector narrows perfectly and resolves to nothing at all. `proof_ref` is an
+opaque, content-addressed reference — no host, path or bearer secret — so
+resolution is self-verifying and the resolver need not be trusted. The verdict
+bytes are asserted byte-identical to the SEP-3004 vectors above: one evidence
+profile, two protocols. Unsolicited contribution; proposes no namespace or
+governance outcome. See the
+[directory README](conformance/a2a-2028-actor-chain-v0/README.md).
+
 ---
 
 ## Conformance (ERC-8004 validation entry, offline-recomputable evidence)
