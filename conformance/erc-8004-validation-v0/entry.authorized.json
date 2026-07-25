@@ -1,0 +1,18 @@
+{
+  "_comment": "Illustrative off-chain view of an ERC-8004 Validation Registry entry (fields mirror contracts/ValidationRegistryUpgradeable.sol: validationRequest(address validatorAddress, uint256 agentId, string requestURI, bytes32 requestHash) + validationResponse(bytes32 requestHash, uint8 response, string responseURI, bytes32 responseHash, string tag)). ELARA supplies the request-side evidence — requestURI + requestHash — which is content-addressed and offline-recomputable. The on-chain identity fields (validatorAddress, agentId) and the validator's response verdict are the registry's side: 'the vector shows the JOIN, their side of the anchor is theirs.' No chain interaction happens on our side.",
+  "_meta": {
+    "elara_supplies": ["requestURI", "requestHash"],
+    "registry_side_illustrative": ["validatorAddress", "agentId", "response", "responseURI", "responseHash"],
+    "requestHash_algorithm": "SHA-256 over the raw bytes of the mandate envelope at requestURI. ERC-8004's requestHash is an OPAQUE bytes32 mapping key — the registry never recomputes or interprets it on-chain — so any collision-resistant 32-byte digest serves. We use SHA-256 because it is the same content-address this demo's x402 settlement receipt back-links to (envelope attestationDigest), so one published envelope anchors both registries. An implementer preferring Ethereum-native keccak256 swaps one hash call; the JOIN pattern is identical.",
+    "requestHash_selfdescribing": "sha256:95b7791e629c6a5f3aaf2622f19dea471ef046c3042d56263425df1c3b81c4d5"
+  },
+  "validatorAddress": "0x0000000000000000000000000000000000000000",
+  "agentId": 0,
+  "requestURI": "examples/envelope.authorized.example.json",
+  "requestHash": "0x95b7791e629c6a5f3aaf2622f19dea471ef046c3042d56263425df1c3b81c4d5",
+  "response": 100,
+  "responseURI": "examples/verdict.authorized.txt",
+  "responseHash": null,
+  "tag": "elara-pq-mandate-v0",
+  "_response_note": "response/responseHash are validator-supplied and shown illustratively (response is a validator-defined uint8; 100 used here for a fully-valid verdict). Elara's offline verdict is DETERMINISTIC — the signing-incapable verifier returns CONSISTENT/authorized or NOT-AUTHORIZED with no scoring model — so a validator running Elara can set responseHash to the content-address of that verdict and any third party recomputes it by re-running the verify command. responseHash is left null here rather than pinning a hash of human-rendered text (which would couple this vector to the verifier's output formatting)."
+}

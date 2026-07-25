@@ -198,6 +198,62 @@ fixtures' generator (`_generate.py`):
 
 ---
 
+## Conformance (ERC-8004 validation entry, offline-recomputable evidence)
+
+The same work-layer receipt composes with the on-chain agent registries too.
+[ERC-8004](https://github.com/erc-8004/erc-8004-contracts) (live on Ethereum
+mainnet) gives agents identity / reputation / **validation** registries; its
+open design thread [#77 *"Off-chain delegation chains bridging to ERC-8004"*](https://github.com/erc-8004/erc-8004-contracts/issues/77)
+asks what the *off-chain* authority half looks like. This is that half.
+
+ERC-8004's Validation Registry records a validation as
+`validationRequest(address validatorAddress, uint256 agentId, string requestURI, bytes32 requestHash)`
+(`contracts/ValidationRegistryUpgradeable.sol`): `requestURI` points at off-chain
+data, and `requestHash` is that data's content hash — an **opaque `bytes32`
+mapping key the registry never recomputes on-chain**. So the entry is only as
+trustworthy as whatever fills that field.
+[`conformance/erc-8004-validation-v0/`](conformance/erc-8004-validation-v0/)
+fills it with an Elara mandate envelope, content-addressed and
+offline-recomputable:
+
+- the off-chain data is a **post-quantum, revocation-aware mandate envelope**
+  (`examples/envelope.*.example.json`), and `requestHash` is **SHA-256 over its
+  bytes** — the *same* content-address this demo's x402 receipt back-links to, so
+  one published envelope anchors both registries;
+- anyone recomputes the digest and re-verifies the envelope **fully offline** with
+  the signing-incapable MIT/Apache verifier — no scorer to trust, exactly the
+  *"a proof to recompute, not a signature to trust"* limit case #77 converged on;
+- `entry.postrevoke.json` references an act signed **after** the mandate was
+  revoked → **NOT AUTHORIZED**: a revocation lifecycle the classical
+  off-chain-delegation sketch lacks (alongside PQ signatures over its Ed25519).
+
+We compose, we do not compete: this is the off-chain work-layer a Validation
+Registry entry *points to*, not a competing chain — no chain interaction happens
+on our side.
+
+Two commands, runnable by a stranger from the repo root (anchored to the
+committed `examples/`, so they reproduce from a bare clone — no secrets, no mint):
+
+```bash
+# 1. Recompute each entry's requestHash from the committed envelope bytes and
+#    check it against the entries + expected.json (Python stdlib only; also runs
+#    the offline verify leg if x402-work-receipt is already built):
+python3 conformance/erc-8004-validation-v0/run_erc8004.py     # exit 0
+
+# 2. Verify the referenced envelopes offline:
+cargo run -p x402-work-receipt -- verify --envelope examples/envelope.authorized.example.json   # ✓ CONSISTENT     (exit 0)
+cargo run -p x402-work-receipt -- verify --envelope examples/envelope.postrevoke.example.json   # ✗ NOT AUTHORIZED (exit 1)
+```
+
+`requestHash` is SHA-256, not Solidity `keccak256` — ERC-8004's `bytes32` is
+algorithm-agnostic (opaque to the registry), and an implementer preferring
+keccak256 swaps one hash call; the join is identical. The on-chain identity and
+the `response`/`responseHash` fields are illustrative (the validator's side); the
+vector demonstrates the off-chain request side, which is ours. Details and full
+honest-claims in [the vector's README](conformance/erc-8004-validation-v0/README.md).
+
+---
+
 ## Architecture (a deliberate license + capability split)
 
 The demo mirrors the real protocol's node/verifier split:

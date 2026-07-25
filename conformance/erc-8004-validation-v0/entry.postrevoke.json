@@ -1,0 +1,18 @@
+{
+  "_comment": "Illustrative off-chain view of an ERC-8004 Validation Registry entry (fields mirror contracts/ValidationRegistryUpgradeable.sol). Same JOIN as entry.authorized.json, but for a mandate act signed AFTER the principal revoked the mandate. This is the delta the ERC-8004 off-chain-delegation sketch (issue #77) lacks: a revocation lifecycle. The referenced envelope carries the revocation record, and the offline verifier returns NOT AUTHORIZED — so the validation entry's own evidence proves authority did NOT hold at act time.",
+  "_meta": {
+    "elara_supplies": ["requestURI", "requestHash"],
+    "registry_side_illustrative": ["validatorAddress", "agentId", "response", "responseURI", "responseHash"],
+    "requestHash_algorithm": "SHA-256 over the raw bytes of the mandate envelope at requestURI (opaque bytes32 to the registry — see entry.authorized.json _meta).",
+    "requestHash_selfdescribing": "sha256:07557dbcd932e577e7c7bed8b5da04e31901ed63e68e12d9e2f9bba009f20650"
+  },
+  "validatorAddress": "0x0000000000000000000000000000000000000000",
+  "agentId": 0,
+  "requestURI": "examples/envelope.postrevoke.example.json",
+  "requestHash": "0x07557dbcd932e577e7c7bed8b5da04e31901ed63e68e12d9e2f9bba009f20650",
+  "response": 0,
+  "responseURI": "examples/verdict.postrevoke.txt",
+  "responseHash": null,
+  "tag": "elara-pq-mandate-v0",
+  "_response_note": "response 0 (illustrative, validator-defined) for a NOT-AUTHORIZED verdict — the act was signed after revocation. The offline verifier proves this deterministically; re-run the verify command to reproduce the ✗ NOT AUTHORIZED / flag post_revocation verdict."
+}

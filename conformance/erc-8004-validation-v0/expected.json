@@ -1,0 +1,17 @@
+{
+  "_comment": "Committed expected values for the ERC-8004 validation-entry vector. run_erc8004.py recomputes each field from the committed, self-contained artifacts in examples/ (zero secrets, no mint step) and asserts equality. requestHash is SHA-256 over the envelope bytes; verify_exit/flag are the offline verifier's outcome for that envelope.",
+  "authorized": {
+    "requestURI": "examples/envelope.authorized.example.json",
+    "requestHash": "0x95b7791e629c6a5f3aaf2622f19dea471ef046c3042d56263425df1c3b81c4d5",
+    "verify_exit": 0,
+    "flag": "valid",
+    "authorized": true
+  },
+  "postrevoke": {
+    "requestURI": "examples/envelope.postrevoke.example.json",
+    "requestHash": "0x07557dbcd932e577e7c7bed8b5da04e31901ed63e68e12d9e2f9bba009f20650",
+    "verify_exit": 1,
+    "flag": "post_revocation",
+    "authorized": false
+  }
+}
