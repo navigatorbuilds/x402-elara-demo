@@ -28,8 +28,8 @@ ROOT = HERE.parent.parent
 FIX = HERE / "fixtures"
 
 CASES = {
-    "authorized": ("envelopes/envelope.payment.json", "verdict.payment.json", 100),
-    "postrevoke": ("envelopes/envelope.postrevoke.json", "verdict.postrevoke.json", 0),
+    "authorized": ("evidence/envelope.payment.json", "verdict.payment.json", 100),
+    "postrevoke": ("evidence/envelope.postrevoke.json", "verdict.postrevoke.json", 0),
 }
 
 

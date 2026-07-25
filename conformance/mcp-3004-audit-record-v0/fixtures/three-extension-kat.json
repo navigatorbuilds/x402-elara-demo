@@ -1,0 +1,34 @@
+{
+  "event_id": "99999999-9999-9999-9999-999999999999",
+  "occurred_at": "2026-06-06T12:00:00.000Z",
+  "principal_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "event_type": "tool_call",
+  "tool_name": "export",
+  "outcome": "deferred",
+  "previous_hash": null,
+  "extensions": {
+    "caller-governance": {
+      "flagged": false,
+      "invoked_by_principal_id": null,
+      "purpose_declared": "reconcile June invoices",
+      "session_id": "55555555-5555-5555-5555-555555555555"
+    },
+    "runtime-security": {
+      "drift_status": "confirmed",
+      "evidence_hash": "sha256:b2c547e2c8f17eafc72ef5c2d4d7b6b4d0f7437ab52bae573a9af14ff5e2d9be",
+      "policy_id": "example.org/runtime-drift@3",
+      "quarantine_decision": "quarantine",
+      "severity": "high"
+    },
+    "authority-evidence": {
+      "evidence_profile": "elara/mandate-bundle@v0",
+      "evidence_digest": "sha3-256:affc42b73b71977e83a108c808852d93278ed2e85c01ef268a317ea2949d17a7",
+      "evidence_uri": "elara:envelope/sha3-256:affc42b73b71977e83a108c808852d93278ed2e85c01ef268a317ea2949d17a7",
+      "authority_verdict": "consistent",
+      "verdict_digest": "sha3-256:aab335a1fd0a10ec67390401d693aa5a182679b0687f242f9f6fa222e358de0f",
+      "act_signed_at": "2026-07-22T08:08:08.740Z",
+      "signature_alg": "ML-DSA-65"
+    }
+  },
+  "event_hash": "81aea291a50bdfd0e0db10e64479117cac9a19126cb28311dbaef70a8efa46b3"
+}

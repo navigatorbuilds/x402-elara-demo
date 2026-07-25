@@ -153,7 +153,7 @@ the extension's three-legs framing advises:
   (`elara:act/sha3-256:23892d77…` — the same 32-byte record hash the seam
   section describes), and `timestampMs` is the act's own signed timestamp;
 - the receipt's `backLink.attestationDigest` is `sha256` over the committed
-  offline envelope (`envelopes/envelope.payment.json`) — the classical receipt
+  offline envelope (`evidence/envelope.payment.json`) — the classical receipt
   chains back to the post-quantum (ML-DSA) mandate attestation;
 - `actionRef` and `evidenceRef` recompute per the upstream math, unchanged.
 
@@ -167,8 +167,8 @@ python3 conformance/x402-settlement-v0/run_elara.py     # exit 0, all verdicts O
 
 # 2. The Rust verifier re-derives the digest that scope commits to, and
 #    verifies the PQ envelope the backLink chains to — fully offline:
-cargo run -p x402-work-receipt -- action-ref --act envelopes/act.payment.json
-cargo run -p x402-work-receipt -- verify --envelope envelopes/envelope.payment.json
+cargo run -p x402-work-receipt -- action-ref --act evidence/act.payment.json
+cargo run -p x402-work-receipt -- verify --envelope evidence/envelope.payment.json
 ```
 
 Both directions were verified before committing: the upstream suite reproduces
@@ -207,7 +207,7 @@ proof to recompute**:
 python3 conformance/erc8004-validation-v0/run_bridge.py   # exit 0, 14 checks
 
 # 2. Re-derive the verdict the response content-addresses — fully offline:
-cargo run -p x402-work-receipt -- verify --envelope envelopes/envelope.payment.json
+cargo run -p x402-work-receipt -- verify --envelope evidence/envelope.payment.json
 ```
 
 Two deliberate differences from the upstream corpus, both documented in the
@@ -220,6 +220,44 @@ fixtures' generator (`_generate.py`):
 - **No risk-score fields.** The mandate verdict is deterministic — signatures
   and the authority chain either verify or they do not — so `decisionDerived`
   asserts no `riskScore`/thresholds. The checker digests the blocks as given.
+
+### MCP SEP-3004 evidence profile (`conformance/mcp-3004-audit-record-v0/`)
+
+The same authority leg registered as an extension of the MCP **Tamper-Evident
+Audit Record Contract** ([modelcontextprotocol#3004](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/3004)),
+whose thread names the seam precisely: the record core answers *"is this audit
+history internally intact"*, and a registered extension commits to its own
+guarantee under its own profile identifier.
+
+The SEP's reference verifier is vendored byte-pinned and run **unmodified** over
+our fixtures; the entire proposed change is one registry entry, and the runner
+shows the same record rejected before it and accepted after. The demonstration
+is a two-record chain — same agent, same mandate, same signed payload, 166 ms
+apart, straddling the revocation:
+
+- both records verify and thread under SEP-3004; every protected core field is
+  identical except `event_id`, `occurred_at` and the chain link, so the contract
+  alone **cannot** tell the authorized act from the post-revocation one;
+- flip one bit of the evidence artifact and the chain still verifies perfectly —
+  the evidence just stops resolving.
+
+Neither property implies the other, which is the argument for the profile.
+
+```bash
+node --experimental-strip-types \
+  conformance/mcp-3004-audit-record-v0/vendor/run_reference.ts   # 8 reference checks
+python3 conformance/mcp-3004-audit-record-v0/run_mcp3004.py      # 7 evidence checks
+```
+
+`canon.py` is an independent second-language reproduction of the SEP's canonical
+form, written from the spec text; the runner asserts it agrees with the vendored
+TypeScript on every fixture and that both still reproduce the SEP's published
+known-answer digests. The three-extension composition record
+(`caller-governance` + `runtime-security` + `authority-evidence` under one
+digest) yields a new known-answer value reproducible with stock `sha256sum`.
+Proposal only — the SEP's authors own the registry; see the
+[directory README](conformance/mcp-3004-audit-record-v0/README.md) for the
+registration shape and the honest claims.
 
 ---
 

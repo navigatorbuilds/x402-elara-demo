@@ -1,0 +1,52 @@
+[
+  {
+    "event_id": "019f88de-2924-7063-98d8-74568dd1fd0a",
+    "occurred_at": "2026-07-22T08:08:08.740Z",
+    "principal_id": "3f947015c8e55291af12879ebdcb8604627d162d37277a9acb5af3d0b38ca8ef",
+    "event_type": "tool_call",
+    "tool_name": "/premium-report",
+    "outcome": "allowed",
+    "previous_hash": null,
+    "extensions": {
+      "caller-governance": {
+        "flagged": false,
+        "purpose_declared": "settle x402 payment for /premium-report"
+      },
+      "authority-evidence": {
+        "evidence_profile": "elara/mandate-bundle@v0",
+        "evidence_digest": "sha3-256:affc42b73b71977e83a108c808852d93278ed2e85c01ef268a317ea2949d17a7",
+        "evidence_uri": "elara:envelope/sha3-256:affc42b73b71977e83a108c808852d93278ed2e85c01ef268a317ea2949d17a7",
+        "authority_verdict": "consistent",
+        "verdict_digest": "sha3-256:aab335a1fd0a10ec67390401d693aa5a182679b0687f242f9f6fa222e358de0f",
+        "act_signed_at": "2026-07-22T08:08:08.740Z",
+        "signature_alg": "ML-DSA-65"
+      }
+    },
+    "event_hash": "f4848bc330d219b098b5ad9ecb74b127c9636ce6def3a8015f3b55386b22c71e"
+  },
+  {
+    "event_id": "019f88de-29ca-7070-81fe-78d105360e30",
+    "occurred_at": "2026-07-22T08:08:08.906Z",
+    "principal_id": "3f947015c8e55291af12879ebdcb8604627d162d37277a9acb5af3d0b38ca8ef",
+    "event_type": "tool_call",
+    "tool_name": "/premium-report",
+    "outcome": "allowed",
+    "previous_hash": "f4848bc330d219b098b5ad9ecb74b127c9636ce6def3a8015f3b55386b22c71e",
+    "extensions": {
+      "caller-governance": {
+        "flagged": false,
+        "purpose_declared": "settle x402 payment for /premium-report"
+      },
+      "authority-evidence": {
+        "evidence_profile": "elara/mandate-bundle@v0",
+        "evidence_digest": "sha3-256:2ce30822b22f8ff69d5e73085aa2bf38a0140b97b21bf01a77dea7a51a3d5eec",
+        "evidence_uri": "elara:envelope/sha3-256:2ce30822b22f8ff69d5e73085aa2bf38a0140b97b21bf01a77dea7a51a3d5eec",
+        "authority_verdict": "not_authorized",
+        "verdict_digest": "sha3-256:da3846d4e136dff53859c378af8bc362da2a66f9c540c50cf4b539f44a83dbd9",
+        "act_signed_at": "2026-07-22T08:08:08.906Z",
+        "signature_alg": "ML-DSA-65"
+      }
+    },
+    "event_hash": "8135ec4e13839119488e5182c0d8622268772b401b0e74a7c8e970ee5a52f334"
+  }
+]
