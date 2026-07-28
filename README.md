@@ -187,6 +187,11 @@ checker blob `06697860273c7e585b75550856ca31193b8a1e3d`, file sha256 in
 
 ### ERC-8004 validation bridge (`conformance/erc8004-validation-v0/`)
 
+*(Near-twin directory names, deliberately distinct artifacts: this **bridge** recomputes the
+registry's hash pair from committed evidence; the hyphenated
+[`erc-8004-validation-v0/`](conformance/erc-8004-validation-v0/) below is the **validation-entry
+vector** for issue #77. Each directory README states which one you are in.)*
+
 The same authority leg, bridged to [ERC-8004](https://github.com/erc-8004/erc-8004-contracts)'s
 Validation Registry — the "off-chain delegation chains anchoring to on-chain agent
 identity" question its design discussion raises. The registry's `requestHash` /
@@ -227,7 +232,10 @@ The same authority leg registered as an extension of the MCP **Tamper-Evident
 Audit Record Contract** ([modelcontextprotocol#3004](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/3004)),
 whose thread names the seam precisely: the record core answers *"is this audit
 history internally intact"*, and a registered extension commits to its own
-guarantee under its own profile identifier.
+guarantee under its own profile identifier. (The MCP spec's
+[`2026-07-28` revision](https://modelcontextprotocol.io/specification/2026-07-28),
+GA as of that date, ships a formal extensions framework — the registration
+mechanism this profile is shaped for.)
 
 The SEP's reference verifier is vendored byte-pinned and run **unmodified** over
 our fixtures; the entire proposed change is one registry entry, and the runner
