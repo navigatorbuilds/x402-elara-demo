@@ -79,6 +79,25 @@ coordinator whose grant is genuinely outside this bundle. Both return
 the realistic case for a long time, and a verifier that reads silence as denial
 punishes every deployment still wiring evidence up.
 
+## Missing, unresolvable, and invalid are three different states
+
+`ac7-invalid-signature.json` (**A7**) is the case between them: the reference is
+**present and resolves** — the digest matches the committed bytes — but the
+resolved envelope's act signature does not verify (one signature byte differs;
+`_generate.py` reproduces the tamper deterministically). The runner reports it
+as `invalid`: distinct from `unresolvable` (there was nothing to check) and
+distinct from `not_authorized` (the check ran and authority was absent). Folding
+`invalid` into `not_authorized` would report broken evidence as a denial — an
+earlier revision of this runner did exactly that, and A7 now pins the
+distinction.
+
+A7 also proves **check order** from the verdict's own audit trail rather than
+asserting it: the committed `verdict.badsig.json` shows exactly one executed
+check — `act signature: fail` — and no window/revocation/scope check ever ran.
+Signature validity short-circuits *before* any lifecycle question, so an
+invalid signature can never be masked as "expired" or "revoked". The flag is
+`input_error`, never a lifecycle flag.
+
 ## One evidence profile, two protocols
 
 **A6** asserts the verdict bytes these `proof_ref`s resolve to are byte-identical

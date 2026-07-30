@@ -24,12 +24,16 @@ Run from repo root: python3 conformance/a2a-2028-actor-chain-v0/_generate.py
 """
 import hashlib
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 FIX = HERE / "fixtures"
 MCP_FIX = ROOT / "conformance" / "mcp-3004-audit-record-v0" / "fixtures"
+VERIFIER = ROOT / "target" / "debug" / "x402-work-receipt"
+VERDICT_MARKER = "--- raw BundleVerdict (verbatim) ---"
 
 # The issuer of our mandates. A real deployment uses its own; the point of the
 # (iss, sub) pair is that `agent:settler` under a different issuer is a different
@@ -90,11 +94,43 @@ def chain(terminal_proof_ref, *, hop2_scopes=None, origin_scopes=None):
     }
 
 
+def make_badsig_envelope() -> None:
+    """Deterministic tamper: the authorized envelope with ONE act-signature byte
+    incremented (index len//2, +1 mod 256). The file still parses, its digest is
+    well-defined, and the reference to it RESOLVES — the failure is inside the
+    resolved bytes, which is the case aeoess asked about: present, resolves,
+    invalid signature. Regenerating always yields the same bytes."""
+    e = json.loads((ROOT / "evidence/envelope.authorized.json").read_text())
+    sig = e["act"]["signature"]
+    i = len(sig) // 2
+    sig[i] = (sig[i] + 1) % 256
+    (ROOT / "evidence/envelope.badsig.json").write_text(
+        json.dumps(e, indent=2, sort_keys=True) + "\n")
+
+
+def run_verifier_verdict(envelope_rel: str, out_name: str) -> None:
+    """The committed verdict is the verbatim output of the real offline
+    verifier over the committed envelope — produced, never hand-written."""
+    if not VERIFIER.exists():
+        sys.exit(f"FATAL: {VERIFIER} missing — build with `cargo build --bin "
+                 "x402-work-receipt` before generating verdicts")
+    out = subprocess.run(
+        [str(VERIFIER), "verify", "--envelope", str(ROOT / envelope_rel), "--json"],
+        capture_output=True, text=True)
+    if VERDICT_MARKER not in out.stdout:
+        sys.exit(f"FATAL: verifier output carries no verdict marker for {envelope_rel}")
+    raw = out.stdout.split(VERDICT_MARKER, 1)[1].lstrip("\n")
+    (FIX / out_name).write_text(raw)
+    print(f"  {out_name} (verbatim verifier output over {envelope_rel})")
+
+
 def main():
     FIX.mkdir(exist_ok=True)
 
+    make_badsig_envelope()
     authorized_ref = proof_ref("evidence/envelope.authorized.json")
     revoked_ref = proof_ref("evidence/envelope.postrevoke.json")
+    badsig_ref = proof_ref("evidence/envelope.badsig.json")
 
     vectors = {
         # AC-1 / AC-2 — THE PAIR. Byte-identical apart from the terminal
@@ -116,6 +152,13 @@ def main():
         # never held. Narrowing violation; the confused-deputy shape from #153.
         "ac5-narrowing-violation.json": chain(
             authorized_ref, hop2_scopes=["pay:x402", "ci:trigger"]),
+
+        # AC-7 — the reference is PRESENT and RESOLVES (digest matches the
+        # committed bytes) but the resolved envelope's act signature is invalid.
+        # A third failure state, distinct from both `unresolvable` (nothing to
+        # check) and `not_authorized` (checked, authority absent). The chain
+        # itself is byte-identical to ac1's shape.
+        "ac7-invalid-signature.json": chain(badsig_ref),
     }
 
     for name, body in vectors.items():
@@ -141,6 +184,10 @@ def main():
     for name in ("verdict.authorized.json", "verdict.postrevoke.json"):
         (FIX / name).write_bytes((MCP_FIX / name).read_bytes())
         print(f"  {name} (mirrored from the SEP-3004 vectors)")
+
+    # verdict.badsig.json is a2a-local (the MCP vector set has no bad-signature
+    # case) and is the real verifier's verbatim output, never hand-written.
+    run_verifier_verdict("evidence/envelope.badsig.json", "verdict.badsig.json")
 
 
 if __name__ == "__main__":

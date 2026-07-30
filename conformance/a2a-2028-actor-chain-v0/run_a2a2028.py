@@ -94,18 +94,31 @@ def append_only_violations(received, forwarded):
 # here dereferences a URL or presents a credential.
 # ---------------------------------------------------------------------------
 KNOWN = {}
-for rel in ("evidence/envelope.authorized.json", "evidence/envelope.postrevoke.json"):
+for rel in ("evidence/envelope.authorized.json", "evidence/envelope.postrevoke.json",
+            "evidence/envelope.badsig.json"):
     raw = (ROOT / rel).read_bytes()
     KNOWN[hashlib.sha3_256(raw).hexdigest()] = rel
 
 VERDICT_FOR = {
     "evidence/envelope.authorized.json": "verdict.authorized.json",
     "evidence/envelope.postrevoke.json": "verdict.postrevoke.json",
+    "evidence/envelope.badsig.json": "verdict.badsig.json",
 }
 
 
 def resolve(hop):
-    """-> (status, detail). status in {consistent, not_authorized, unresolvable}."""
+    """-> (status, detail). status in {consistent, not_authorized, invalid,
+    unresolvable}.
+
+    Four states, deliberately not three. `unresolvable` = nothing to check
+    (absent ref / unknown scheme / resolves to nothing). `not_authorized` =
+    checked, and the authority was absent (revoked, lapsed, wrong agent…).
+    `invalid` = the reference RESOLVED but the resolved evidence fails
+    verification itself (e.g. a bad carrier signature) — no authority judgment
+    was ever reached. Folding `invalid` into `not_authorized` would misreport
+    broken evidence as a denial; an earlier revision of this very file did
+    exactly that (any non-CONSISTENT verdict mapped to not_authorized), which
+    is the conflation aeoess's check-order comment warns about."""
     ref = hop.get("proof_ref")
     if ref is None:
         # The thread's normative rule: absence means no reconciliation aid was
@@ -118,8 +131,11 @@ def resolve(hop):
     if rel is None:
         return "unresolvable", "reference resolves to nothing"
     verdict = json.loads((FIX / VERDICT_FOR[rel]).read_text())
-    return ("consistent" if verdict["verdict"] == "CONSISTENT" else "not_authorized",
-            verdict["explanation"])
+    if verdict["verdict"] == "CONSISTENT":
+        return "consistent", verdict["explanation"]
+    if verdict["verdict"] == "FAILED":
+        return "invalid", verdict["reason"]
+    return "not_authorized", verdict["explanation"]
 
 
 def terminal(doc):
@@ -130,6 +146,7 @@ ac1, ac2 = load("ac1-authorized.json"), load("ac2-revoked.json")
 ac3, ac4 = load("ac3-fabricated.json"), load("ac4-no-proof-ref.json")
 ac5 = load("ac5-narrowing-violation.json")
 ac6 = load("ac6-prior-hop-rewritten.json")
+ac7 = load("ac7-invalid-signature.json")
 
 # ---------------------------------------------------------------------------
 # W1 — every well-formed vector passes the narrowing check.
@@ -240,6 +257,35 @@ same = all((FIX / n).read_bytes() == (MCP_FIX / n).read_bytes()
 check("A6-same-evidence-across-protocols", same,
       "verdict bytes identical to the SEP-3004 vectors — the evidence layer is "
       "transport-neutral, and drift here fails the build")
+
+# ---------------------------------------------------------------------------
+# A7 — present, resolves, INVALID. The reference matches the committed bytes
+# (so this is not A4's wrong-bytes case and not A2/A3's unresolvable), but the
+# resolved envelope's act signature does not verify. Three assertions:
+#   (i)  the status is `invalid` — distinct from `unresolvable` AND from
+#        `not_authorized`; broken evidence is not a denial.
+#   (ii) the committed verdict carries NO lifecycle flag (flag=input_error,
+#        never post_revocation/lapsed/…) — an invalid signature cannot be
+#        misreported as "expired" or "revoked".
+#   (iii) ORDER, proven from the verdict's own audit trail: exactly one check
+#        ran (`act signature`, fail) and no window/revocation check ever
+#        executed. Signature validity short-circuits BEFORE lifecycle, so the
+#        expired-masking-broken-sig failure mode cannot occur by construction.
+# ---------------------------------------------------------------------------
+s7, d7 = resolve(terminal(ac7))
+v7 = json.loads((FIX / "verdict.badsig.json").read_text())
+trail = [(c["name"], c["status"]) for c in v7.get("checks", [])]
+lifecycle_ran = any(("window" in n or "revocation" in n or "scope" in n)
+                    for n, _ in trail)
+check("A7-invalid-is-not-a-denial-and-order-is-proven",
+      not narrowing_violations(ac7)
+      and s7 == "invalid"
+      and v7["verdict"] == "FAILED" and v7["flag"] == "input_error"
+      and "signature" in v7["reason"]
+      and trail == [("act signature", "fail")]
+      and not lifecycle_ran,
+      f"resolves, then fails verification itself: {v7['reason']}; audit trail "
+      f"= {trail} — signature checked first, no lifecycle check ever ran")
 
 # ---------------------------------------------------------------------------
 print()
