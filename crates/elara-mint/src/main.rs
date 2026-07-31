@@ -64,6 +64,16 @@ enum Cmd {
         /// Directory to write fixtures into.
         #[arg(long, default_value = "fixtures")]
         out: PathBuf,
+        /// The op this mandate scopes the agent to.
+        #[arg(long, default_value = SCOPE_OP)]
+        scope_op: String,
+        /// Per-act amount ceiling in the op's smallest unit (USDC ops:
+        /// micro-USDC, so 2000000 = 2 USDC). Omitted = no ceiling stated.
+        #[arg(long)]
+        max_amount: Option<u64>,
+        /// Mandate nonce — a NEW nonce is a NEW mandate, never an un-revoke.
+        #[arg(long, default_value = MANDATE_NONCE)]
+        nonce: String,
     },
     /// Sign one agent act referencing the mandate. Prints the 32-byte action_ref.
     SignAct {
@@ -96,7 +106,9 @@ enum Cmd {
 
 fn main() -> Result<()> {
     match Cli::parse().cmd {
-        Cmd::Provision { out } => provision(&out),
+        Cmd::Provision { out, scope_op, max_amount, nonce } => {
+            provision(&out, &scope_op, max_amount, &nonce)
+        }
         Cmd::SignAct { agent, mandate_ref, payload_json, out } => {
             sign_act(&agent, &mandate_ref, &payload_json, &out)
         }
@@ -144,7 +156,7 @@ fn signed_record(
     Ok(rec)
 }
 
-fn provision(out: &Path) -> Result<()> {
+fn provision(out: &Path, scope_op: &str, max_amount: Option<u64>, nonce: &str) -> Result<()> {
     std::fs::create_dir_all(out).with_context(|| format!("create {}", out.display()))?;
 
     let principal = Identity::generate(EntityType::Human, CryptoProfile::ProfileB)
@@ -153,9 +165,9 @@ fn provision(out: &Path) -> Result<()> {
         .map_err(|e| anyhow!("keygen agent: {e}"))?;
 
     let scope = MandateScope {
-        allowed_ops: vec![SCOPE_OP.to_string()],
+        allowed_ops: vec![scope_op.to_string()],
         allowed_zones: vec!["*".to_string()],
-        max_amount: None,
+        max_amount,
     };
     let m = MandateRecord::new_root(
         NETWORK,
@@ -165,7 +177,7 @@ fn provision(out: &Path) -> Result<()> {
         WINDOW_OPEN_MS,
         WINDOW_CLOSE_MS,
         0, // sub_delegation_max_depth
-        MANDATE_NONCE,
+        nonce,
     );
     if !m.is_well_formed() {
         return Err(anyhow!("minted mandate is not well-formed"));
@@ -195,12 +207,16 @@ fn provision(out: &Path) -> Result<()> {
             "mandate_id": mandate_id,
             "principal_identity_hash": principal.identity_hash,
             "agent_identity_hash": agent.identity_hash,
-            "scope_ops": [SCOPE_OP],
+            "scope_ops": [scope_op],
             "scope_zones": ["*"],
             "window_open_ms": WINDOW_OPEN_MS,
             "window_close_ms": WINDOW_CLOSE_MS,
-            "nonce": MANDATE_NONCE,
-            "_note": "v0 enforces agent identity + window + revocation; op/zone scope is recorded, not checked offline.",
+            "nonce": nonce,
+            "scope_max_amount": max_amount,
+            "_note": "v0 enforces agent identity + window + revocation; op/zone scope and \
+                      scope_max_amount are RECORDED in the signed mandate (unit is op-defined; \
+                      micro-USDC for USDC payment ops) — offline-verifier amount enforcement \
+                      is the next upgrade.",
         }),
     )?;
 
