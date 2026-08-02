@@ -6,7 +6,7 @@ around the distinction the thread converged on: **well-formedness and authority
 are two properties, and the first does not imply the second.**
 
 ```
-python3 run_a2a2028.py        # 9 checks, under a second, no network
+python3 run_a2a2028.py        # 12 checks, under a second, no network
 ```
 
 ---
@@ -97,6 +97,33 @@ check — `act signature: fail` — and no window/revocation/scope check ever ra
 Signature validity short-circuits *before* any lifecycle question, so an
 invalid signature can never be masked as "expired" or "revoked". The flag is
 `input_error`, never a lifecycle flag.
+
+## The reserved slot: `originAnchor` (v0: named, never consulted)
+
+The thread's cold-start discussion (WSorr's lineage-as-trust case, giskard09's
+Sybil objection) converged on: *if* lineage ever feeds trust, the origins need
+non-self-reported anchoring — and reserving the field name now is cheap,
+renaming later is not. So v0 names the slot and pins it **inert**:
+
+```
+originAnchor: { "ref": "<opaque content-addressed reference>" }   # optional, any hop
+```
+
+An anchor describes where a hop **came from** — never what it may do. Verifiers
+MUST NOT consult it for well-formedness or authority in v0. "Cheap now" is only
+true if inertness is provable, so both vectors populate the slot aggressively —
+one ref is well-formed but resolves to nothing (the slot's evidence class does
+not exist yet), one ref *resolves to a committed envelope*, the most tempting
+possible anchor:
+
+- **W4 / `ac8`** — forward-compat: ac1's chain with anchors on the origin and
+  terminal hop. Every outcome identical to ac1, and stripping the anchors yields
+  ac1 byte-for-byte. The reservation was actually free.
+- **A8 / `ac9`** — no privilege via anchor: ac5's narrowing violation wearing
+  resolvable anchors. The violation is flagged identically, the anchored
+  no-`proof_ref` hop stays `unresolvable` (an anchor is not evidence), and the
+  terminal verdict is unchanged. "Cheap to add" and "cheap to exploit later"
+  look identical until this negative is written down — this is it, executable.
 
 ## One evidence profile, two protocols
 

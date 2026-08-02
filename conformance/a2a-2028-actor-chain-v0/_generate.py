@@ -177,6 +177,39 @@ def main():
                    indent=2, sort_keys=True) + "\n")
     print("  ac6-prior-hop-rewritten.json")
 
+    # AC-8 / AC-9 — the RESERVED `originAnchor` slot (thread, 2026-07-31→08-01):
+    # named now, consulted never. An anchor describes where a hop CAME FROM —
+    # never what it may do. Reserving the name is cheap only if it is provably
+    # inert, so both vectors populate it aggressively: one ref is well-formed
+    # but resolves to nothing (the slot's evidence class does not exist yet),
+    # and one ref RESOLVES to a committed envelope — the most tempting possible
+    # anchor, and it must still change nothing.
+    #
+    # AC-8 — FORWARD-COMPAT. ac1's chain with anchors populated on the origin
+    # and the terminal hop. Every check outcome must be identical to ac1's, and
+    # stripping the anchors must yield ac1 exactly — proof the reservation was
+    # actually free.
+    ac8 = chain(authorized_ref)
+    ac8["actorChain"]["origin"]["originAnchor"] = {
+        "ref": "elara:envelope/sha3-256:" + "11" * 32}
+    ac8["actorChain"]["actors"][1]["originAnchor"] = {"ref": authorized_ref}
+    (FIX / "ac8-origin-anchor-forward-compat.json").write_text(
+        json.dumps(ac8, indent=2, sort_keys=True) + "\n")
+    print("  ac8-origin-anchor-forward-compat.json")
+
+    # AC-9 — NO PRIVILEGE VIA ANCHOR. ac5's narrowing violation with a
+    # RESOLVABLE anchor on both the violating hop and the evidence-less
+    # coordinator hop. The violation must be flagged identically, and the
+    # anchored no-proof_ref hop must stay `unresolvable` — an anchor never
+    # stands in for scope the predecessor actually held, and never becomes
+    # evidence for a hop that supplied none.
+    ac9 = chain(authorized_ref, hop2_scopes=["pay:x402", "ci:trigger"])
+    ac9["actorChain"]["actors"][0]["originAnchor"] = {"ref": authorized_ref}
+    ac9["actorChain"]["actors"][1]["originAnchor"] = {"ref": authorized_ref}
+    (FIX / "ac9-anchor-grants-nothing.json").write_text(
+        json.dumps(ac9, indent=2, sort_keys=True) + "\n")
+    print("  ac9-anchor-grants-nothing.json")
+
     # The verdicts these proof_refs resolve to are the SAME committed verdict
     # bytes the MCP SEP-3004 vectors carry. Copied here so this directory stands
     # alone, and pinned by check A6 so the two can never drift apart — that

@@ -1,0 +1,39 @@
+{
+  "actorChain": {
+    "actors": [
+      {
+        "iss": "elara:testnet",
+        "requested_action": "pay:x402",
+        "scopes": [
+          "repo:read",
+          "pay:x402"
+        ],
+        "sub": "agent:coordinator"
+      },
+      {
+        "iss": "elara:testnet",
+        "originAnchor": {
+          "ref": "elara:envelope/sha3-256:affc42b73b71977e83a108c808852d93278ed2e85c01ef268a317ea2949d17a7"
+        },
+        "proof_ref": "elara:envelope/sha3-256:affc42b73b71977e83a108c808852d93278ed2e85c01ef268a317ea2949d17a7",
+        "requested_action": "pay:x402",
+        "scopes": [
+          "pay:x402"
+        ],
+        "sub": "agent:x402-settler"
+      }
+    ],
+    "origin": {
+      "iss": "elara:testnet",
+      "originAnchor": {
+        "ref": "elara:envelope/sha3-256:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "scopes": [
+        "repo:read",
+        "ci:trigger",
+        "pay:x402"
+      ],
+      "sub": "user:principal-18b6d2fc"
+    }
+  }
+}

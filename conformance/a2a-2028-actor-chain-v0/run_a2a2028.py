@@ -147,6 +147,18 @@ ac3, ac4 = load("ac3-fabricated.json"), load("ac4-no-proof-ref.json")
 ac5 = load("ac5-narrowing-violation.json")
 ac6 = load("ac6-prior-hop-rewritten.json")
 ac7 = load("ac7-invalid-signature.json")
+ac8 = load("ac8-origin-anchor-forward-compat.json")
+ac9 = load("ac9-anchor-grants-nothing.json")
+
+
+def strip_anchors(doc):
+    """Remove every `originAnchor` — the reserved slot must be exactly this
+    removable: no check below may change outcome when it disappears."""
+    d = json.loads(json.dumps(doc))
+    d["actorChain"]["origin"].pop("originAnchor", None)
+    for h in d["actorChain"]["actors"]:
+        h.pop("originAnchor", None)
+    return d
 
 # ---------------------------------------------------------------------------
 # W1 — every well-formed vector passes the narrowing check.
@@ -286,6 +298,46 @@ check("A7-invalid-is-not-a-denial-and-order-is-proven",
       and not lifecycle_ran,
       f"resolves, then fails verification itself: {v7['reason']}; audit trail "
       f"= {trail} — signature checked first, no lifecycle check ever ran")
+
+# ---------------------------------------------------------------------------
+# W4 — the RESERVED `originAnchor` slot is inert (forward-compat). ac8 is ac1
+# with anchors populated on the origin (well-formed ref that resolves to
+# nothing) and the terminal hop (a ref that RESOLVES to a committed envelope —
+# the most tempting possible anchor). Everything must come out exactly as ac1,
+# and stripping the anchors must yield ac1 itself: the reservation was
+# actually free.
+# ---------------------------------------------------------------------------
+s8, _ = resolve(terminal(ac8))
+s8_stripped, _ = resolve(terminal(strip_anchors(ac8)))
+check("W4-reserved-originAnchor-is-inert",
+      not narrowing_violations(ac8)
+      and s8 == "consistent"
+      and s8_stripped == s8
+      and strip_anchors(ac8) == ac1,
+      "anchors populated on origin + terminal (one even resolvable); narrowing "
+      "and resolution identical to ac1, and stripped it IS ac1 — unknown-slot "
+      "tolerance proven, not assumed")
+
+# ---------------------------------------------------------------------------
+# A8 — NO PRIVILEGE VIA ANCHOR. ac9 is ac5's narrowing violation wearing
+# resolvable anchors on both the violating hop and the evidence-less
+# coordinator. The violation is flagged identically; the coordinator stays
+# `unresolvable` (an anchor is not evidence and cannot stand in for a missing
+# proof_ref); the terminal verdict is unchanged. Anchors describe where a hop
+# came from — never what it may do.
+# ---------------------------------------------------------------------------
+v9 = narrowing_violations(ac9)
+mid9, _ = resolve(ac9["actorChain"]["actors"][0])
+t9, _ = resolve(terminal(ac9))
+t5_again, _ = resolve(terminal(ac5))
+check("A8-no-privilege-via-anchor",
+      len(v9) == 1
+      and v9 == narrowing_violations(ac5)
+      and mid9 == "unresolvable"
+      and t9 == t5_again,
+      "ac5's violation flagged identically with anchors present; the anchored "
+      "no-proof_ref hop is still unresolvable and the terminal verdict is "
+      "unchanged — an anchor grants nothing, rescues nothing")
 
 # ---------------------------------------------------------------------------
 print()
