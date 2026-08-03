@@ -199,8 +199,16 @@ identity" question its design discussion raises. The registry's `requestHash` /
 fill that shape so that **the validation response is not a score to trust but a
 proof to recompute**:
 
-- `requestHash` = NIST SHA3-256 over the committed offline envelope (the evidence);
+- `requestHash` = NIST SHA3-256 over the committed settlement envelope
+  [`evidence/envelope.payment.json`](evidence/envelope.payment.json);
 - `responseHash` = NIST SHA3-256 over the committed verifier verdict JSON;
+- **the digest algorithm here is SHA3-256, and in the `erc-8004-validation-v0`
+  vector below it is SHA-256** — not a contradiction and not a stale line: these
+  are two different suites hashing two different files. ERC-8004's `requestHash`
+  is an opaque `bytes32` the registry never recomputes, so each vector states its
+  own algorithm and both recompute from committed bytes (`run_bridge.py` and
+  `run_erc8004.py` each exit 0). Reconciled after an outside reader recomputed
+  both and reported the ambiguity (erc-8004#77);
 - `response` uses only the deterministic endpoints — **100** iff the offline
   verifier returns ✓ CONSISTENT, **0** iff ✗ NOT AUTHORIZED (the post-revocation
   counter-case is a committed fixture pair, not a footnote);
@@ -339,12 +347,48 @@ cargo run -p x402-work-receipt -- verify --envelope examples/envelope.authorized
 cargo run -p x402-work-receipt -- verify --envelope examples/envelope.postrevoke.example.json   # ✗ NOT AUTHORIZED (exit 1)
 ```
 
-`requestHash` is SHA-256, not Solidity `keccak256` — ERC-8004's `bytes32` is
+`requestHash` here is SHA-256 over `examples/envelope.*.example.json` — distinct
+from the SHA3-256 the *bridge* suite above computes over
+`evidence/envelope.payment.json`; different suite, different file, and each
+runner recomputes its own. It is also SHA-256 rather than Solidity
+`keccak256` — ERC-8004's `bytes32` is
 algorithm-agnostic (opaque to the registry), and an implementer preferring
 keccak256 swaps one hash call; the join is identical. The on-chain identity and
 the `response`/`responseHash` fields are illustrative (the validator's side); the
 vector demonstrates the off-chain request side, which is ours. Details and full
 honest-claims in [the vector's README](conformance/erc-8004-validation-v0/README.md).
+
+---
+
+## Witnessed anchor (`conformance/witnessed-anchor-v0/`)
+
+The same envelope hash, timestamped by **someone else's** transparency log — and re-verified
+here from bytes rather than taken on their word.
+
+```bash
+python3 conformance/witnessed-anchor-v0/run_anchor.py   # exit 0, Python stdlib only
+```
+
+The authorized envelope's SHA-256 (`95b7791e…`, the same content-address the ERC-8004 vector
+recomputes as `requestHash`) is leaf **6312** in a C2SP `tlog-checkpoint` log at
+[log.markovianprotocol.com](https://log.markovianprotocol.com), operated by MarkovianProtocol.
+The runner recomputes the SHA-256 over our committed envelope, folds the RFC 6962 inclusion
+proof to the published root, verifies the checkpoint's **Ed25519** signature under the log's
+published vkey (RFC 8032, implemented in the runner — no dependencies), and checks a
+consistency proof showing nothing was rewritten underneath the leaf.
+
+The leaf carries its own scope line, and it is the boundary both sides agreed before the join:
+
+> existence and witnessed order of these bytes only; no authority or validity claim
+
+So this is a **witnessed timestamp, not a verdict**. Whether the mandate authorizes anything
+stays in the offline recompute above, where a reader can derive it without trusting us or the
+log operator. Witness cosignatures (7 independent, 4-of-7 quorum) are reported but *not*
+verified — that would need each witness's own key fetched from that witness. Full limits in
+[the vector's README](conformance/witnessed-anchor-v0/README.md).
+
+Arranged in the open in
+[erc-8004#77](https://github.com/erc-8004/erc-8004-contracts/issues/77).
 
 ---
 

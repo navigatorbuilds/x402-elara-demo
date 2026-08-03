@@ -1,0 +1,1 @@
+{"claim":{"request_hash":"sha256:95b7791e629c6a5f3aaf2622f19dea471ef046c3042d56263425df1c3b81c4d5","request_uri":"examples/envelope.authorized.example.json","scope":"existence and witnessed order of these bytes only; no authority or validity claim","source":"navigatorbuilds/x402-elara-demo@65cb06b"},"claimType":"erc8004-envelope-anchor/v1"}

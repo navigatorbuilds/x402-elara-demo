@@ -1,0 +1,15 @@
+markovianprotocol.com/log
+C2SP tlog-checkpoint-format transparency log
+
+tree size : 6357
+vkey      : markovianprotocol.com/log+0302c6c8+ATkpOWo95UuEiW2EhNZAol4f0CS8hMluJfPcTSzrr03v
+
+GET /checkpoint
+GET /consistency?old=<n>&new=<m>
+GET /inclusion?leaf=<i>&size=<m>
+GET /leaf/<i>
+GET /leaves?start=<s>&end=<e>
+GET /receipt/scitt/<i>          (RFC 9942 COSE receipt)
+GET /tile/<L>/<N>[.p/<W>]           (c2sp.org/tlog-tiles)
+GET /tile/entries/<N>[.p/<W>]
+GET /health

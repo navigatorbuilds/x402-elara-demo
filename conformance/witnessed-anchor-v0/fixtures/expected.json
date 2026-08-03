@@ -1,0 +1,14 @@
+{
+  "_comment": "Committed expected values for the witnessed-anchor vector. run_anchor.py recomputes every one of these from the committed artifacts in this directory plus examples/envelope.authorized.example.json — Python stdlib only, including the Ed25519 verification. Nothing here is taken on trust; if the log ever served a different leaf, a different proof, or an unsigned checkpoint, the runner fails.",
+  "_provenance": "Leaf appended by the log operator (MarkovianProtocol, log.markovianprotocol.com) at our request in erc-8004/erc-8004-contracts#77, 2026-08-03. Artifacts fetched from that log's public endpoints the same day.",
+  "leaf_index": 6312,
+  "leaf_bytes": 342,
+  "leaf_sha256": "aae9e6622979beff230e50ce71a6f8ce4b862d5054072e6fd5ab346d4cfe6b0c",
+  "envelope_sha256": "95b7791e629c6a5f3aaf2622f19dea471ef046c3042d56263425df1c3b81c4d5",
+  "proof_size": 6322,
+  "root_at_6322": "remSJ+JMwkrIE4BQ55OOcTim6YqjBsksKrayjzltMaU=",
+  "checkpoint_size": 6355,
+  "checkpoint_root": "SwnuHq3IUykq/aic2M5uuqRjLFm/gvckHQcA2hyxTGk=",
+  "log_origin": "markovianprotocol.com/log",
+  "log_vkey": "markovianprotocol.com/log+0302c6c8+ATkpOWo95UuEiW2EhNZAol4f0CS8hMluJfPcTSzrr03v"
+}
