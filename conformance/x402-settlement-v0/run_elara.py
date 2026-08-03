@@ -13,7 +13,7 @@ v1.1.1 (commit 719827c, tree c25f5fca, git blob 0669786027). This runner:
   3. compares the verdicts against the committed expected.json;
   4. additionally re-resolves the receipt's backLink: the attestationDigest
      must equal sha256 over the committed post-quantum envelope file
-     (envelopes/envelope.payment.json) — the content-addressed join from the
+     (evidence/envelope.payment.json, the committed copy) — the content-addressed join from the
      classical receipt to the ML-DSA mandate attestation.
 
 The one verdict this cannot outsource to Python is the scope digest itself:
@@ -38,7 +38,12 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 CHECKER = HERE / "_check_independent.py"
 CHECKER_SHA256 = "c6af0937632b83c8563c7197eddfa40a5838d78a238bcbe00f097061d3c3a07d"
-ENVELOPE = ROOT / "envelopes" / "envelope.payment.json"
+# evidence/ is the COMMITTED copy of the same bytes (verified byte-identical
+# at repoint time). envelopes/ is per-run mint output and gitignored, so a
+# bare clone lacks it — reported by MarkovianProtocol on erc-8004#77
+# (2026-08-03): every vendored leg passed, then the backLink leg died on the
+# missing file. The stranger path is the product; point at what ships.
+ENVELOPE = ROOT / "evidence" / "envelope.payment.json"
 
 
 def main() -> int:
