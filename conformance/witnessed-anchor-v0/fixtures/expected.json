@@ -1,14 +1,35 @@
 {
-  "_comment": "Committed expected values for the witnessed-anchor vector. run_anchor.py recomputes every one of these from the committed artifacts in this directory plus examples/envelope.authorized.example.json — Python stdlib only, including the Ed25519 verification. Nothing here is taken on trust; if the log ever served a different leaf, a different proof, or an unsigned checkpoint, the runner fails.",
-  "_provenance": "Leaf appended by the log operator (MarkovianProtocol, log.markovianprotocol.com) at our request in erc-8004/erc-8004-contracts#77, 2026-08-03. Artifacts fetched from that log's public endpoints the same day.",
-  "leaf_index": 6312,
-  "leaf_bytes": 342,
-  "leaf_sha256": "aae9e6622979beff230e50ce71a6f8ce4b862d5054072e6fd5ab346d4cfe6b0c",
-  "envelope_sha256": "95b7791e629c6a5f3aaf2622f19dea471ef046c3042d56263425df1c3b81c4d5",
-  "proof_size": 6322,
-  "root_at_6322": "remSJ+JMwkrIE4BQ55OOcTim6YqjBsksKrayjzltMaU=",
-  "checkpoint_size": 6355,
-  "checkpoint_root": "SwnuHq3IUykq/aic2M5uuqRjLFm/gvckHQcA2hyxTGk=",
+  "_comment": "Committed expected values for the witnessed-anchor vector. run_anchor.py recomputes every one of these from the committed artifacts in this directory plus the two committed envelopes under examples/ — Python stdlib only, including the Ed25519 verification. Nothing here is taken on trust; if the log ever served a different leaf, a different proof, or an unsigned checkpoint, the runner fails.",
+  "_provenance": "Leaves appended by the log operator (MarkovianProtocol, log.markovianprotocol.com) at our request in erc-8004/erc-8004-contracts#77 — leaf 6312 (authorized envelope) and leaf 6371 (post-revocation envelope), both 2026-08-03. Artifacts fetched from that log's public endpoints; checkpoint snapshot taken 2026-08-04 at tree size 6492.",
+  "anchors": [
+    {
+      "leaf_index": 6312,
+      "leaf_file": "leaf.6312.json",
+      "leaf_bytes": 342,
+      "leaf_sha256": "aae9e6622979beff230e50ce71a6f8ce4b862d5054072e6fd5ab346d4cfe6b0c",
+      "envelope": "examples/envelope.authorized.example.json",
+      "envelope_sha256": "95b7791e629c6a5f3aaf2622f19dea471ef046c3042d56263425df1c3b81c4d5",
+      "proof_size": 6322,
+      "inclusion_file": "inclusion.6312.6322.txt",
+      "root_at_proof_size": "remSJ+JMwkrIE4BQ55OOcTim6YqjBsksKrayjzltMaU=",
+      "consistency_file": "consistency.6322.6492.txt"
+    },
+    {
+      "leaf_index": 6371,
+      "leaf_file": "leaf.6371.json",
+      "leaf_bytes": 342,
+      "leaf_sha256": "6e201fd2c6c869a38dbab340bf3d3e8a2634e307d46444f352e3ab2c0b1aded0",
+      "envelope": "examples/envelope.postrevoke.example.json",
+      "envelope_sha256": "07557dbcd932e577e7c7bed8b5da04e31901ed63e68e12d9e2f9bba009f20650",
+      "proof_size": 6372,
+      "inclusion_file": "inclusion.6371.6372.txt",
+      "root_at_proof_size": "YchM/hjrYZdPELT4KLOTKwO33hy21yuqYl9AykIiwDg=",
+      "consistency_file": "consistency.6372.6492.txt"
+    }
+  ],
+  "checkpoint_file": "checkpoint.6492.txt",
+  "checkpoint_size": 6492,
+  "checkpoint_root": "Paj3fOoTxHmtVEVrZm5vf3JeaGIuRyEXycIGRh6L7E8=",
   "log_origin": "markovianprotocol.com/log",
   "log_vkey": "markovianprotocol.com/log+0302c6c8+ATkpOWo95UuEiW2EhNZAol4f0CS8hMluJfPcTSzrr03v"
 }

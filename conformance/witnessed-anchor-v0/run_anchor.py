@@ -1,33 +1,44 @@
 #!/usr/bin/env python3
-"""Witnessed-anchor vector — offline re-verification of a third-party transparency-log
-anchor over this repo's committed mandate envelope. Python stdlib only.
+"""Witnessed-anchor vector — offline re-verification of third-party transparency-log
+anchors over this repo's committed mandate envelopes. Python stdlib only.
 
-Claim boundary (the log operator's own wording, carried in the leaf's `scope` field):
+TWO anchors, one history: the authorized envelope (leaf 6312) and the post-revocation
+envelope (leaf 6371). The revocation case is the half that makes the authority claim
+falsifiable rather than decorative — both leaves are proven prefixes of ONE signed
+checkpoint, so the authorized grant and its revocation sit in the same witnessed order.
+
+Claim boundary (the log operator's own wording, carried in each leaf's `scope` field):
 inclusion in a witnessed log proves *these bytes existed in a witnessed order*, and
 nothing else. Authority and validity stay with the offline recompute over the committed
-envelope — `conformance/erc-8004-validation-v0/run_erc8004.py` and the MIT/Apache
+envelopes — `conformance/erc-8004-validation-v0/run_erc8004.py` and the MIT/Apache
 verifier — exactly where the other vectors put them.
 
-What this recomputes from committed bytes, taking nothing on trust:
+What this recomputes from committed bytes, taking nothing on trust — per anchor:
 
-  1. SHA-256 over examples/envelope.authorized.example.json equals the request_hash
-     inside the log leaf  (the anchor is over OUR bytes, not something adjacent)
+  1. SHA-256 over the committed envelope equals the request_hash inside the log leaf
+     (each anchor is over OUR bytes, not something adjacent)
   2. the committed leaf is byte-identical to the one the log serves, and its SHA-256
      matches the digest published alongside it
-  3. the RFC 6962 inclusion proof folds leaf 6312 up to the published root at tree
-     size 6322
-  4. the live checkpoint carries a valid Ed25519 signature under the log's published
-     vkey  (Ed25519 verification implemented here from RFC 8032 — no dependencies)
-  5. the RFC 6962 consistency proof shows the size-6322 tree is a prefix of the
-     signed size-6355 tree — i.e. nothing was rewritten under our leaf
+  3. the RFC 6962 inclusion proof folds the leaf up to the published root at that
+     anchor's tree size (6312@6322, 6371@6372)
+  4. the RFC 6962 consistency proof shows that tree is a prefix of the signed
+     checkpoint tree — i.e. nothing was rewritten under the leaf
+
+and once, shared:
+
+  5. the checkpoint carries a valid Ed25519 signature under the log's published vkey
+     (Ed25519 verification implemented here from RFC 8032 — no dependencies)
 
 Re-fetch the live artifacts and re-run to check the log against its own history:
   curl -s https://log.markovianprotocol.com/checkpoint
   curl -s "https://log.markovianprotocol.com/inclusion?leaf=6312&size=6322"
-  curl -s "https://log.markovianprotocol.com/consistency?old=6322&new=6355"
+  curl -s "https://log.markovianprotocol.com/inclusion?leaf=6371&size=6372"
+  curl -s "https://log.markovianprotocol.com/consistency?old=6322&new=<head>"
+  curl -s "https://log.markovianprotocol.com/consistency?old=6372&new=<head>"
   curl -s https://log.markovianprotocol.com/leaf/6312
+  curl -s https://log.markovianprotocol.com/leaf/6371
 
-Provenance: leaf appended by the log operator (MarkovianProtocol) at our request in
+Provenance: leaves appended by the log operator (MarkovianProtocol) at our request in
 erc-8004/erc-8004-contracts#77; every artifact here was fetched from the endpoints above.
 """
 
@@ -40,10 +51,6 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 FIX = HERE / "fixtures"
 ROOT = HERE.parent.parent
-
-LEAF_INDEX = 6312
-PROOF_SIZE = 6322
-ENVELOPE_REL = "examples/envelope.authorized.example.json"
 
 ok = True
 
@@ -219,41 +226,10 @@ def b64lines(path):
 
 
 def main():
-    # 1. the anchor is over OUR committed bytes
-    leaf_bytes = (FIX / "leaf.6312.json").read_bytes().rstrip(b"\n")
-    leaf = json.loads(leaf_bytes)
-    env_sha = hashlib.sha256((ROOT / ENVELOPE_REL).read_bytes()).hexdigest()
-    check(
-        "anchored leaf binds this repo's committed envelope",
-        leaf["claim"]["request_hash"] == "sha256:" + env_sha,
-        f"sha256({ENVELOPE_REL}) = {env_sha}",
-    )
-    check(
-        "leaf request_uri names that same file",
-        leaf["claim"]["request_uri"] == ENVELOPE_REL,
-        leaf["claim"]["request_uri"],
-    )
-    check("leaf carries the narrow claim type", leaf["claimType"] == "erc8004-envelope-anchor/v1")
-    print(f"       leaf scope: {leaf['claim']['scope']}")
-
-    # 2. leaf digest as published
-    leaf_sha = hashlib.sha256(leaf_bytes).hexdigest()
     expected = json.loads((FIX / "expected.json").read_text())
-    check("committed leaf digest matches the published one", leaf_sha == expected["leaf_sha256"], leaf_sha)
-    check("leaf is RFC 8785 canonical length", len(leaf_bytes) == expected["leaf_bytes"], f"{len(leaf_bytes)} bytes")
 
-    # 3. inclusion proof folds to the published root
-    proof = b64lines(FIX / "inclusion.6312.6322.txt")
-    root = root_from_inclusion(h_leaf(leaf_bytes), LEAF_INDEX, PROOF_SIZE, proof)
-    root_b64 = base64.b64encode(root).decode()
-    check(
-        f"inclusion proof folds leaf {LEAF_INDEX} to the root at size {PROOF_SIZE}",
-        root_b64 == expected["root_at_6322"],
-        root_b64,
-    )
-
-    # 4. the live checkpoint is signed by the log's published key
-    body, sigs = parse_note((FIX / "checkpoint.6355.txt").read_text())
+    # Shared: the checkpoint is signed by the log's published key.
+    body, sigs = parse_note((FIX / expected["checkpoint_file"]).read_text())
     lines = body.splitlines()
     origin, signed_size, signed_root_b64 = lines[0], int(lines[1]), lines[2]
     vkey = [
@@ -284,19 +260,57 @@ def main():
     print("       (witness cosignatures are recorded, not verified here — each witness's own")
     print("        key would have to be fetched from that witness; the log's signature is)")
 
-    # 5. nothing was rewritten under our leaf between 6322 and the signed head
-    good, why = consistent(
-        PROOF_SIZE,
-        signed_size,
-        b64lines(FIX / "consistency.6322.6355.txt"),
-        base64.b64decode(expected["root_at_6322"]),
-        base64.b64decode(signed_root_b64),
-    )
-    check(f"tree at size {PROOF_SIZE} is an unmodified prefix of the signed size-{signed_size} tree", good, why)
+    # Per anchor: the four recomputed legs.
+    for a in expected["anchors"]:
+        idx, size, env_rel = a["leaf_index"], a["proof_size"], a["envelope"]
+        print(f"\n----- anchor: leaf {idx} <- {env_rel}")
+
+        # 1. the anchor is over OUR committed bytes
+        leaf_bytes = (FIX / a["leaf_file"]).read_bytes().rstrip(b"\n")
+        leaf = json.loads(leaf_bytes)
+        env_sha = hashlib.sha256((ROOT / env_rel).read_bytes()).hexdigest()
+        check(
+            "anchored leaf binds this repo's committed envelope",
+            leaf["claim"]["request_hash"] == "sha256:" + env_sha,
+            f"sha256({env_rel}) = {env_sha}",
+        )
+        check(
+            "leaf request_uri names that same file",
+            leaf["claim"]["request_uri"] == env_rel,
+            leaf["claim"]["request_uri"],
+        )
+        check("leaf carries the narrow claim type", leaf["claimType"] == "erc8004-envelope-anchor/v1")
+        print(f"       leaf scope: {leaf['claim']['scope']}")
+
+        # 2. leaf digest as published
+        leaf_sha = hashlib.sha256(leaf_bytes).hexdigest()
+        check("committed leaf digest matches the published one", leaf_sha == a["leaf_sha256"], leaf_sha)
+        check("leaf is RFC 8785 canonical length", len(leaf_bytes) == a["leaf_bytes"], f"{len(leaf_bytes)} bytes")
+
+        # 3. inclusion proof folds to the published root
+        proof = b64lines(FIX / a["inclusion_file"])
+        root = root_from_inclusion(h_leaf(leaf_bytes), idx, size, proof)
+        root_b64 = base64.b64encode(root).decode()
+        check(
+            f"inclusion proof folds leaf {idx} to the root at size {size}",
+            root_b64 == a["root_at_proof_size"],
+            root_b64,
+        )
+
+        # 4. nothing was rewritten under this leaf between its tree and the signed head
+        good, why = consistent(
+            size,
+            signed_size,
+            b64lines(FIX / a["consistency_file"]),
+            root,
+            base64.b64decode(signed_root_b64),
+        )
+        check(f"tree at size {size} is an unmodified prefix of the signed size-{signed_size} tree", good, why)
 
     print()
     if ok:
-        print("all anchor checks passed — these envelope bytes existed in a witnessed order.")
+        print("all anchor checks passed — both envelopes' bytes existed in ONE witnessed order:")
+        print("the authorized grant (leaf 6312) and its revocation (leaf 6371) under one signed head.")
         print("Authority and validity are NOT claimed here; run run_erc8004.py for those.")
         return 0
     print("FAILED")
